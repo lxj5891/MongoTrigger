@@ -12,6 +12,7 @@ function passInt(val){
 	}
 	return val;
 }
+
 db.metadata.ancestors.drop();
 db.books.drop();
 db.metadata.ancestors.insert({collection: 'categories', parent: 'parent', ancestors: 'ancestors'});
@@ -20,20 +21,23 @@ db.metadata.embeddeds.insert({referrer: {collection: 'books', field: 'categories
 
 
 db.categories.drop();
-db.categories.insert({ _id: "node1"  , parent: null 	});
-db.categories.insert({ _id: "node01" , parent: "node1"	});
-db.categories.insert({ _id: "node02" , parent: "node1"	});
-db.categories.insert({ _id: "node03" , parent: "node1"	});
+db.categories.insert({ _id: "node1"  , parent: null });
+db.categories.insert({ _id: "node01" , parent: "node1"});
+db.categories.insert({ _id: "node02" , parent: "node1"});
+db.categories.insert({ _id: "node03" , parent: "node1"});
 
-for ( var i = 0 ;i < 30 ;i ++ ) {
+for ( var i = 0 ;i < 300 ;i ++ ) {
+
 	db.categories.insert( { _id: "node" + passInt(i) , parent: "node01"});
 }	
 
-for ( var i = 30 ;i < 60 ;i ++ ) {
+for ( var i = 300 ;i < 600 ;i ++ ) {
+
 	db.categories.insert( { _id: "node" + passInt(i) , parent: "node02"});
 }	
 
-for ( var i = 60 ;i < 90 ;i ++ ) {
+for ( var i = 600 ;i < 900 ;i ++ ) {
+	
 	db.categories.insert( { _id: "node" + passInt(i) , parent: "node03"});
 }
 

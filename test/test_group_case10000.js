@@ -5,13 +5,17 @@ print("------- Case 3 ancestors & embeddeds -------");
 
 function passInt(val){
 	if(val < 10){
-		return "00" + val;
+		return "000" + val;
 	}
 	if(val > 9 && val < 100) {
+		return "00" + val;
+	}
+	if(val > 100 && val < 1000) {
 		return "0" + val;
 	}
 	return val;
 }
+
 db.metadata.ancestors.drop();
 db.books.drop();
 db.metadata.ancestors.insert({collection: 'categories', parent: 'parent', ancestors: 'ancestors'});
@@ -25,15 +29,18 @@ db.categories.insert({ _id: "node01" , parent: "node1"	});
 db.categories.insert({ _id: "node02" , parent: "node1"	});
 db.categories.insert({ _id: "node03" , parent: "node1"	});
 
-for ( var i = 0 ;i < 30 ;i ++ ) {
+for ( var i = 0 ;i < 3000 ;i ++ ) {
+
 	db.categories.insert( { _id: "node" + passInt(i) , parent: "node01"});
 }	
 
-for ( var i = 30 ;i < 60 ;i ++ ) {
+for ( var i = 3000 ;i < 6000 ;i ++ ) {
+
 	db.categories.insert( { _id: "node" + passInt(i) , parent: "node02"});
 }	
 
-for ( var i = 60 ;i < 90 ;i ++ ) {
+for ( var i = 6000 ;i < 9000 ;i ++ ) {
+	
 	db.categories.insert( { _id: "node" + passInt(i) , parent: "node03"});
 }
 

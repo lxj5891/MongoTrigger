@@ -70,17 +70,23 @@ function update( collection, _id, key, value ) {
 //////////////////////////////////////////////////////
 
 function do_embeddeds( op, tag, infos ) {
+
+	// printjson(infos);
+printjson("do_embeddeds start");
 	if ( op.o2 === undefined ) return;
 	for ( var i = 0; i < infos.length; i++ ) {
 		var info = infos[i];
 		if ( info.master.collection != tag[1] ) continue;
 		var master = get_master( op.o, info );
+		printjson(master);
 		if ( !master ) continue;
 		var referrer = get_referrer( op.o2, info );
+		printjson(referrer);
 		if ( !referrer ) continue;
 		var conn = connect( info.referrer.db || tag[0] );
 		conn[ info.referrer.collection ].update( referrer, { $set: master }, { multi: true } );
 	}
+printjson("do_embeddeds end");
 }
 
 function get_master( data, info ) {
@@ -115,18 +121,19 @@ var trigger_func = {
 };
 
 var option = DBQuery.Option.awaitData | DBQuery.Option.tailable;
-var cursor = db.getSisterDB("local").oplog.rs.find().addOption( option );
+var cursor = connect( 'local' ).oplog.rs.find().addOption( option );
 
-printjson(cursor.count());
 for ( var stop = false, cursor = cursor.skip( cursor.count() ); !stop; ) {
-	printjson(cursor.hasNext());
 	var now = new Date();
-printjson(now);
+
+	var sumTime = 0;
+	printjson(cursor.hasNext());
 	while ( cursor.hasNext() ) {
-		
+
+		var now = new Date().getTime();
+
 		var op = cursor.next();
 
-printjson( op );
 		if ( op.ns === stop_collection ) {
 			stop = true;
 			break;
@@ -138,8 +145,10 @@ printjson( op );
 		}
 
 		var tag = op.ns.split('.');
+
 		trigger_data[ tag[0] ] = trigger_data[ tag[0] ] || {};
 		if ( tag[1] === metadata && tag[2] ) {
+
 			var conn = connect( tag[0] );
 			var collection = op.ns.slice( op.ns.indexOf('.') + 1 );
 			trigger_data[ tag[0] ][ tag[2] ] = conn[collection].find().toArray();
@@ -147,16 +156,24 @@ printjson( op );
 
 		for ( var key in trigger_func ) {
 			var data = trigger_data[ tag[0] ][ key ];
+
 			if ( !data ) continue; // null, undefined, empty array
+
+			printjson(key);
 			trigger_func[ key ]( op, tag, data );
 		}
-		printjson("end1 1");
-	}
-printjson("end");
 
+		var end = new Date().getTime();
+		var addTime = end - now;
+		sumTime = sumTime  + addTime;
+		print("sum time " + sumTime);
+	}
+
+	if(!cursor.hasNext()) {
+		sumTime = 0;
+	}
 	// Safety Trap for busy loop.
 	if ( (new Date()) - now < 100 ) {
 		break;
 	}
-printjson("end 1");
 }

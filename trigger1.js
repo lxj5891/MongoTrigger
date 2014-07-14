@@ -15,7 +15,7 @@ function do_ancestors( op, tag, infos ) {
 		var info = infos[i];
 		if ( info.collection != tag[1] ) continue;
 		update_ancestors( tag[0], op, info );
-	}       
+	}
 }	       
 
 function update_ancestors( db, op, info ) {
@@ -143,9 +143,9 @@ var cursor = connect( 'local' ).oplog.rs.find().addOption( option );
 for ( var stop = false, cursor = cursor.skip( cursor.count() ); !stop; ) {
 	var now = new Date();
 //printjson( now );
-
+	var sumTime = 0;
 	while ( cursor.hasNext() ) {
-		
+		var now = new Date().getTime();
 		var op = cursor.next();
 		printjson(op);
 
@@ -187,6 +187,11 @@ for ( var stop = false, cursor = cursor.skip( cursor.count() ); !stop; ) {
 
 			printjson("key :" + key);
 		}
+		
+		var end = new Date().getTime();
+		var addTime = end - now;
+		sumTime = sumTime  + addTime;
+		print("sum time " + sumTime);
 	}
 
 	// Safety Trap for busy loop.

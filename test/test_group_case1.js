@@ -22,7 +22,13 @@ db.categories.insert( { _id: "Programming", ancestors: [ "Books", "Programing" ]
 db.categories.insert( { _id: "Books", ancestors: [ "Books" ], parent: null } )
 
 db.metadata.ancestors.insert({collection: 'categories', parent: 'parent', ancestors: 'ancestors'});
-// db.books.insert( { _id: "Book", categories: [ { _id: "MongoDB" } ] } )
+
+
+
+for ( var i = 0 ;i < 100 ;i ++ ){
+i= 4;
+// db.books.insert( { _id: "Book", categories: [ { _id: "MongoDB" } ] } );
+}
 
 db.categories.update( {_id: "MongoDB"}, {$set: {parent: "Languages"}});
 db.categories.update( {_id: "dbm"}, {$set: {parent: "MongoDB"}});

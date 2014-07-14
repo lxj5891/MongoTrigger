@@ -11,12 +11,15 @@ var stop_collection = 'test.stop'; // database:test collection:stop
 //////////////////////////////////////////////////////
 
 function do_ancestors( op, tag, infos ) {
+	var done = false;
 	for ( var i = 0; i < infos.length; i++ ) {
 		var info = infos[i];
 		if ( info.collection != tag[1] ) continue;
 		update_ancestors( tag[0], op, info );
-	}       
-}	       
+		done = true;
+	}
+	return done;
+}
 
 function update_ancestors( db, op, info ) {
 	var field = info.parent; 
@@ -70,7 +73,12 @@ function update( collection, _id, key, value ) {
 //////////////////////////////////////////////////////
 
 function do_embeddeds( op, tag, infos ) {
-	if ( op.o2 === undefined ) return;
+	var done = false;
+	if ( op.o2 === undefined ) return done;
+	
+	// printjson(infos);
+	// print("infos.length : " + infos.length);
+
 	for ( var i = 0; i < infos.length; i++ ) {
 		var info = infos[i];
 		if ( info.master.collection != tag[1] ) continue;
@@ -79,8 +87,10 @@ function do_embeddeds( op, tag, infos ) {
 		var referrer = get_referrer( op.o2, info );
 		if ( !referrer ) continue;
 		var conn = connect( info.referrer.db || tag[0] );
-		conn[ info.referrer.collection ].update( referrer, { $set: master }, { multi: true } );
+		conn[ info.referrer.collection ].update( referrer, { $set: master }, { multi: true ,w : 2} );
+		done = true;
 	}
+	return done;
 }
 
 function get_master( data, info ) {
@@ -115,18 +125,15 @@ var trigger_func = {
 };
 
 var option = DBQuery.Option.awaitData | DBQuery.Option.tailable;
-var cursor = db.getSisterDB("local").oplog.rs.find().addOption( option );
+var cursor = connect( 'local' ).oplog.rs.find().addOption( option );
 
-printjson(cursor.count());
 for ( var stop = false, cursor = cursor.skip( cursor.count() ); !stop; ) {
-	printjson(cursor.hasNext());
 	var now = new Date();
-printjson(now);
-	while ( cursor.hasNext() ) {
-		
-		var op = cursor.next();
+//printjson( now );
 
-printjson( op );
+	while ( cursor.hasNext() ) {
+		var op = cursor.next();
+//printjson( op );
 		if ( op.ns === stop_collection ) {
 			stop = true;
 			break;
@@ -148,15 +155,18 @@ printjson( op );
 		for ( var key in trigger_func ) {
 			var data = trigger_data[ tag[0] ][ key ];
 			if ( !data ) continue; // null, undefined, empty array
-			trigger_func[ key ]( op, tag, data );
+
+			var start = new Date();
+			var done = trigger_func[ key ]( op, tag, data );
+			if ( done ) {
+				var time = (new Date()) - start;
+				printjson( { trigger: key, time: time, collection: op.ns } );
+			}
 		}
-		printjson("end1 1");
 	}
-printjson("end");
 
 	// Safety Trap for busy loop.
 	if ( (new Date()) - now < 100 ) {
 		break;
 	}
-printjson("end 1");
 }

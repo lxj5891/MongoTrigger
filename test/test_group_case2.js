@@ -33,3 +33,4 @@ var Obj_0 = db.categories.findOne( {_id: "dbm"}, {ancestors: 1} );
 var Obj_1 = { "_id" : "dbm", "ancestors" : [ "Books", "Programming", "Language", "MongoDB", "dbm" ] };
 assert.eq.automsg(Obj_0, Obj_1);
 
+sh.moveChunk("test.")

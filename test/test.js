@@ -3,6 +3,7 @@
 // Case 1
 print("------- Case 1 -------");
 
+var now = new Date();
 db.metadata.embeddeds.drop();
 db.users.drop();
 db.documents.drop();
@@ -11,7 +12,9 @@ db.metadata.embeddeds.insert({referrer: {collection: 'documents', field: 'author
 db.users.insert({"_id" : ObjectId("539c511fb2980377adc224cd"), name: 'sakurai',  age: 42});
 db.documents.insert({"_id" : ObjectId("539c511fb2980377adc224ca"), title: 'doc1', author: {"_id" : ObjectId("539c511fb2980377adc224cd")}});
 db.users.update({"_id" : ObjectId("539c511fb2980377adc224cd")}, {$set: {"name": 'sakurai2'}});
-
+var finish = new Date();
+var mis = finish.getTime() - now.getTime();
+print(mis + "ms");
 sleep(100);
 
 var document0 = db.documents.findOne({"_id" : ObjectId("539c511fb2980377adc224ca")}, {"author.name":1});
@@ -23,7 +26,7 @@ assert.eq.automsg(document0, document1);
 // Case 2
 // フィールド名がドットを含む場合
 print("------- Case 2 -------");
-
+var now = new Date();
 db.metadata.embeddeds.drop();
 db.users.drop();
 db.documents.drop();
@@ -32,6 +35,10 @@ db.metadata.embeddeds.insert({referrer: {collection: 'documents', field: 'author
 db.users.insert({"_id" : ObjectId("539c511fb2980377adc224cd"), name: {last: 'sakurai', first: 'hajime'}, age: 42});
 db.documents.insert({"_id" : ObjectId("539c511fb2980377adc224ca"), title: 'doc1', author: [{"_id" : ObjectId("539c511fb2980377adc224cd")}]});
 db.users.update({"_id" : ObjectId("539c511fb2980377adc224cd")}, {$set: {"name.first": 'hajime2'}});
+
+var finish = new Date();
+var mis = finish.getTime() - now.getTime();
+print(mis + "ms");
 
 sleep(100);
 
@@ -44,6 +51,8 @@ assert.eq.automsg(document0, document1);
 // 配列型で複数のレコードが更新対象の場合
 print("------- Case 3 -------");
 
+var now = new Date();
+
 db.metadata.embeddeds.drop();
 db.users.drop();
 db.documents.drop();
@@ -54,6 +63,10 @@ db.documents.insert({"_id" : ObjectId("539c511fb2980377adc224ca"), title: 'doc1'
 db.documents.insert({"_id" : ObjectId("539c511fb2980377adc224cb"), title: 'doc2', author: [{"_id" : ObjectId("539c511fb2980377adc224cd")}]});
 db.documents.insert({"_id" : ObjectId("539c511fb2980377adc224cc"), title: 'doc3', author: [{"_id" : ObjectId("539c511fb2980377adc224ce")}]});
 db.users.update({"_id" : ObjectId("539c511fb2980377adc224cd")}, {$set: {"name.first": 'hajime2'}});
+
+var finish = new Date();
+var mis = finish.getTime() - now.getTime();
+print(mis + "ms");
 
 sleep(100);
 
@@ -75,6 +88,8 @@ assert.eq.automsg(doc3_0, doc3_1);
 // _id ではない検索条件を指定した場合
 print("------- Case 4 -------");
 
+var now = new Date();
+
 db.metadata.embeddeds.drop();
 db.users.drop();
 db.documents.drop();
@@ -83,6 +98,10 @@ db.metadata.embeddeds.insert({referrer: {collection: 'documents', field: 'author
 db.users.insert({"_id" : ObjectId("539c511fb2980377adc224cd"), name: 'sakurai',  age: 42});
 db.documents.insert({"_id" : ObjectId("539c511fb2980377adc224ca"), title: 'doc1', author: {"_id" : ObjectId("539c511fb2980377adc224cd")}});
 db.users.update({"age" : 42}, {$set: {"name": 'sakurai2'}});
+
+var finish = new Date();
+var mis = finish.getTime() - now.getTime();
+print(mis + "ms");
 
 sleep(100);
 
@@ -94,6 +113,8 @@ assert.eq.automsg(document0, document1);
 
 // Case 5
 print("------- Case 5 -------");
+
+var now = new Date();
 
 db.metadata.embeddeds.drop();
 db.groups.drop();
@@ -112,6 +133,11 @@ ObjectId("539c511fb2980377adc224cf"),
 ObjectId("539c511fb2980377adc224ce"),
 ObjectId("539c511fb2980377adc224cd")
 ]}});
+
+var finish = new Date();
+var mis = finish.getTime() - now.getTime();
+print(mis + "ms");
+
 sleep(100);
 var doc0 = db.documents.findOne({"_id": ObjectId("539c511fb2980377adc224ca")}, {"groups.parents":1});
 var doc1 = { "_id" : ObjectId("539c511fb2980377adc224ca"), "groups" : [ { "parents" : [ ObjectId("539c511fb2980377adc224cf"), ObjectId("539c511fb2980377adc224ce"), ObjectId("539c511fb2980377adc224cd") ] } ] }
@@ -122,6 +148,7 @@ assert.eq.automsg(doc0, doc1);
 // 親フォルダの権限を子供のファイルが継承する場合
 print("------- Case 6 -------");
 
+var now = new Date();
 
 db.metadata.embeddeds.drop();
 db.metadata.embeddeds.insert({referrer: {collection: 'documents', field: 'folders', multi: true}, master: {collection: 'folders', fields: ['name', 'parents']}});
@@ -133,6 +160,11 @@ db.documents.drop();
 db.documents.insert({"_id" : "Book-X", title: 'Book-X', folders: [{"_id" : "C"}]});
 
 db.folders.update({"_id" : "C"}, {$set: {"parents": [ "A", "B", "D", "C"]}});
+
+var finish = new Date();
+var mis = finish.getTime() - now.getTime();
+print(mis + "ms");
+
 sleep(100);
 var doc0 = db.documents.findOne({"_id": "Book-X"}, {"folders.parents":1});
 var doc1 = { "_id" : "Book-X", "folders" : [ { "parents" : [ "A", "B", "D", "C" ] } ] }
@@ -143,6 +175,7 @@ assert.eq.automsg(doc0, doc1);
 // embeddedsに条件がつく場合
 print("------- Case 7 -------");
 
+var now = new Date();
 
 db.metadata.embeddeds.drop();
 db.metadata.embeddeds.insert({referrer: {collection: 'documents', field: 'folders', multi: true, condition: {type: 0}}, master: {collection: 'folders', fields: ['name', 'parents']}});
@@ -155,6 +188,11 @@ db.documents.insert({"_id" : "Book-X", title: 'Book-X', folders: [{"_id" : "C"}]
 db.documents.insert({"_id" : "Book-Y", title: 'Book-Y', folders: [{"_id" : "C"}], type: 1});
 
 db.folders.update({"_id" : "C"}, {$set: {"parents": [ "A", "B", "D", "C"]}});
+
+var finish = new Date();
+var mis = finish.getTime() - now.getTime();
+print(mis + "ms");
+
 sleep(100);
 var doc0 = db.documents.findOne({"_id": "Book-X"}, {"folders.parents":1});
 var doc1 = { "_id" : "Book-X", "folders" : [ { "parents" : [ "A", "B", "D", "C" ] } ] };
@@ -167,6 +205,8 @@ assert.eq.automsg(doc20, doc21);
 // Case 8
 // DBが異なる場合
 print("------- Case 8 -------");
+
+var now = new Date();
 
 use test;
 db.metadata.embeddeds.drop();
@@ -181,6 +221,10 @@ db.documents.insert({"_id" : "doc1", title: 'doc1', author: {"_id" : "sakurai"}}
 
 use test;
 db.users.update({"_id" : "sakurai"}, {$set: {"name": 'sakurai2'}});
+
+var finish = new Date();
+var mis = finish.getTime() - now.getTime();
+print(mis + "ms");
 
 sleep(100);
 

@@ -1,3 +1,11 @@
+
+
+> 启动数据库 
+``` sh
+sudo ./bin/mongod --replSet test --dbpath ./db/
+```
+
+
 Chiwawaでの、SmartCore側への大きな機能追加は3点。
  1)クラウド・ストレージ化
  2)閲覧権限の追加
